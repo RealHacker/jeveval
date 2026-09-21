@@ -1,0 +1,1 @@
+{"label":"1","probabilities":{"1":1.0,"2":0.0},"latency_seconds":5.699985194951296e-06,"model":"deterministic","usage":{"input_tokens":0,"output_tokens":0,"cost_usd":null},"raw_response":null,"cached":false}

@@ -1,0 +1,25 @@
+{
+  "results": [
+    {
+      "model": "deterministic",
+      "benchmark": "winogrande",
+      "accurate": 2,
+      "total": 3,
+      "accuracy": 0.6666666666666666,
+      "ece_10": 0.33333333333333337,
+      "brier": 0.6666666666666666,
+      "latency_mean_seconds": 4.866664918760459e-06,
+      "latency_p50_seconds": 5.600013537332416e-06,
+      "latency_p95_seconds": 5.689988029189408e-06,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": null,
+      "cost_per_1k_examples_usd": null,
+      "successful": 3,
+      "failed": 0,
+      "unscored": 0,
+      "cached": 0
+    }
+  ],
+  "slices": []
+}

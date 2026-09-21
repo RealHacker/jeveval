@@ -1,0 +1,110 @@
+[
+  {
+    "benchmark": "folio",
+    "source": "datasets\\folio\\folio-validation.jsonl",
+    "source_sha256": "6922c988ef10987bd6545568ee8e63e897af80994591fa20539767da58f8e3d1",
+    "source_count": 204,
+    "mini_count": 100,
+    "seed": 42,
+    "path": "datasets\\mini\\folio.jsonl"
+  },
+  {
+    "benchmark": "proofwriter",
+    "source": "datasets\\proofwriter\\data-test.jsonl",
+    "source_sha256": "13efc74afcb648f322520168924de48c82aed5a64a0c527ea1ff69fb523e162d",
+    "source_count": 11820,
+    "mini_count": 100,
+    "seed": 42,
+    "path": "datasets\\mini\\proofwriter.jsonl"
+  },
+  {
+    "benchmark": "winogrande",
+    "source": "datasets\\winogrande\\data.jsonl",
+    "source_sha256": "4263afcab36b27dc6c3683a60806d3bc11ac593ca1814f27c5b51f9357d399c8",
+    "source_count": 10234,
+    "mini_count": 100,
+    "seed": 42,
+    "path": "datasets\\mini\\winogrande.jsonl"
+  },
+  {
+    "benchmark": "commonsenseqa",
+    "source": "datasets\\commonsenseQA\\dev_rand_split.jsonl",
+    "source_sha256": "3210497fdaae614ac085d9eb873dd7f4d49b6f965a93adadc803e1229fd8a02a",
+    "source_count": 1221,
+    "mini_count": 100,
+    "seed": 42,
+    "path": "datasets\\mini\\commonsenseqa.jsonl"
+  },
+  {
+    "benchmark": "musr-object-placements",
+    "source": "datasets\\musr\\object_placements.json",
+    "source_sha256": "db3789d265b9869811d967770873c1397634be53093d8a46ba1a92be1a3292f1",
+    "source_count": 256,
+    "mini_count": 100,
+    "seed": 42,
+    "path": "datasets\\mini\\musr-object-placements.jsonl"
+  },
+  {
+    "benchmark": "musr-team-allocation",
+    "source": "datasets\\musr\\team_allocation.json",
+    "source_sha256": "f25653d60abf4e93ecf368e1a83be321cb400df41e43fe7fadc76b023c4b56c1",
+    "source_count": 250,
+    "mini_count": 100,
+    "seed": 42,
+    "path": "datasets\\mini\\musr-team-allocation.jsonl"
+  },
+  {
+    "benchmark": "cladder-easy",
+    "source": "datasets\\cladder\\cladder-v1-q-easy.json",
+    "source_sha256": "6da16904f4673309c7486fbbca6fdafe62fc3564adb9aba0d34db2756963112a",
+    "source_count": 10560,
+    "mini_count": 100,
+    "seed": 42,
+    "path": "datasets\\mini\\cladder-easy.jsonl"
+  },
+  {
+    "benchmark": "cladder-balanced",
+    "source": "datasets\\cladder\\cladder-v1-q-balanced.json",
+    "source_sha256": "7ca1e3c0aa3d0e3ab7f0a31d469c9a7ce738526c7a78b2e5649d17670c27b699",
+    "source_count": 10112,
+    "mini_count": 100,
+    "seed": 42,
+    "path": "datasets\\mini\\cladder-balanced.jsonl"
+  },
+  {
+    "benchmark": "cladder-hard",
+    "source": "datasets\\cladder\\cladder-v1-q-hard.json",
+    "source_sha256": "666b2d3de2f47e9ade5f59158cc5eb7f90ab1ef8240e2a6292ac459654695f55",
+    "source_count": 10556,
+    "mini_count": 100,
+    "seed": 42,
+    "path": "datasets\\mini\\cladder-hard.jsonl"
+  },
+  {
+    "benchmark": "jevbench-easy",
+    "source": "datasets\\jevbench\\easy.jsonl",
+    "source_sha256": "231df3c2c8e88a1a8c137ebe85de96ba70fabd330849098ac7b3c52c70b7172b",
+    "source_count": 48,
+    "mini_count": 48,
+    "seed": 42,
+    "path": "datasets\\mini\\jevbench-easy.jsonl"
+  },
+  {
+    "benchmark": "jevbench-original",
+    "source": "datasets\\jevbench\\original.jsonl",
+    "source_sha256": "5c2414edb3006b8bfcb70fda433f0f9ca015759433849f8d3104328a1f7c4180",
+    "source_count": 72,
+    "mini_count": 72,
+    "seed": 42,
+    "path": "datasets\\mini\\jevbench-original.jsonl"
+  },
+  {
+    "benchmark": "jevbench-hard",
+    "source": "datasets\\jevbench\\hard.jsonl",
+    "source_sha256": "89e9e6becb33ed88c1de7d42dcc87531b2fb64cfaef4e1986faf7c37b3f80ebb",
+    "source_count": 111,
+    "mini_count": 100,
+    "seed": 42,
+    "path": "datasets\\mini\\jevbench-hard.jsonl"
+  }
+]

@@ -1,0 +1,29 @@
+dataset_root: datasets
+mini_root: datasets/mini
+output_dir: outputs
+cache_dir: outputs/cache
+
+run:
+  benchmarks: folio,proofwriter,jevbench
+  models: jev,reference
+  mode: mini
+  concurrency: 8
+  max_retries: 4
+
+models:
+  jev:
+    type: jev
+    model: jev-latest
+    api_key_env: TYPESAFE_API_KEY
+    input_price_per_million: 0.042
+
+  qwen:
+    type: openai_compatible
+    base_url: https://api.modelverse.cn/v1
+    endpoint_path: /chat/completions
+    model: qwen3-30b-a3b
+    api_key_env: OPENAI_API_KEY
+    structured_outputs: true
+    # Set these for cost reporting; prices are USD per one million tokens.
+    input_price_per_million: null
+    output_price_per_million: null
