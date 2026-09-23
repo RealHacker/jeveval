@@ -1,5 +1,6 @@
 __pycache__/
 *.py[cod]
+*.exe
 .pytest_cache/
 .venv/
 dist/
