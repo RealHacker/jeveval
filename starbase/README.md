@@ -14,11 +14,12 @@ StarBase is a standalone Go app for collecting, tagging, and browsing your starr
 Run from this directory:
 
 ```powershell
+go build
 $env:GH_TOKEN = "..."
-go run . fetch
 $env:TYPESAFE_API_KEY = "..."
-go run . tag
- go run . serve
+starbase fetch
+starbase tag
+starbase serve
 ```
 
 `fetch` collects the user's starred repositories, repository metadata, language breakdowns, README excerpt, 60-day commit count, weekly star history and LOC details. It replaces the prior repository dataset only after collecting the current list. GitHub API calls are serial, paginated, and wait on rate-limit reset information. The activity score is the commit count in the last 60 days; fewer than 10 commits is inactive. Commit records are discarded.
