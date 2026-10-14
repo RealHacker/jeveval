@@ -1,0 +1,6 @@
+starbase.db
+starbase.db-shm
+starbase.db-wal
+starbase.exe
+.gocache/
+.gomodcache/
