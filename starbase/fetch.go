@@ -92,44 +92,7 @@ func fetchAll(ctx context.Context, db *sql.DB, c *http.Client, token, base strin
 	since := now.Add(-60 * 24 * time.Hour).Format(time.RFC3339)
 	results := make([]fetchedRepo, 0, len(repos))
 	for i, r := range repos {
-		owner := r.Owner.Login
-		if owner == "" {
-			parts := strings.SplitN(r.FullName, "/", 2)
-			if len(parts) > 1 {
-				owner = parts[0]
-			}
-		}
-		item := fetchedRepo{repository: r, StarStatus: "unavailable", LOCStatus: "unavailable"}
-		item.Owner.Login = owner
-		item.Languages, err = getLanguages(ctx, c, token, base, owner, r.Name)
-		if err != nil {
-			item.Error = appendErr(item.Error, "languages: "+err.Error())
-		}
-		item.Commits, err = countCommits(ctx, c, token, base, owner, r.Name, since)
-		if err != nil {
-			item.Error = appendErr(item.Error, "commits: "+err.Error())
-			item.ActivityStatus = "error"
-		} else {
-			item.ActivityStatus = "ready"
-			item.Active = item.Commits >= 10
-			item.ActivityScore = item.Commits
-		}
-		item.Weeks, err = getStarHistory(ctx, c, token, base, owner, r.Name)
-		if err != nil {
-			item.Error = appendErr(item.Error, "star history: "+err.Error())
-		} else {
-			item.StarStatus = "ready"
-		}
-		item.LOC, err = getLOC(ctx, c, owner, r.Name, r.Branch)
-		if err != nil {
-			item.Error = appendErr(item.Error, "LOC: "+err.Error())
-		} else {
-			item.LOCStatus = "ready"
-		}
-		item.Readme, err = getReadme(ctx, c, token, base, owner, r.Name)
-		if err != nil && !isHTTPStatus(err, 404) {
-			item.Error = appendErr(item.Error, "README: "+err.Error())
-		}
+		item := enrichRepo(ctx, c, token, base, since, r)
 		results = append(results, item)
 		fmt.Printf("fetched %d/%d %s\n", i+1, len(repos), r.FullName)
 	}
@@ -145,7 +108,7 @@ func fetchAll(ctx context.Context, db *sql.DB, c *http.Client, token, base strin
 		return err
 	}
 	for _, x := range results {
-		if err = insertRepo(tx, x); err != nil {
+		if _, err = insertRepo(tx, x); err != nil {
 			return fmt.Errorf("save %s: %w", x.FullName, err)
 		}
 	}
@@ -157,6 +120,49 @@ func fetchAll(ctx context.Context, db *sql.DB, c *http.Client, token, base strin
 	}
 	fmt.Printf("saved %d repositories to SQLite\n", len(results))
 	return nil
+}
+
+func enrichRepo(ctx context.Context, c *http.Client, token, base, since string, r repository) fetchedRepo {
+	owner := r.Owner.Login
+	if owner == "" {
+		parts := strings.SplitN(r.FullName, "/", 2)
+		if len(parts) > 1 {
+			owner = parts[0]
+		}
+	}
+	item := fetchedRepo{repository: r, StarStatus: "unavailable", LOCStatus: "unavailable"}
+	item.Owner.Login = owner
+	var err error
+	item.Languages, err = getLanguages(ctx, c, token, base, owner, r.Name)
+	if err != nil {
+		item.Error = appendErr(item.Error, "languages: "+err.Error())
+	}
+	item.Commits, err = countCommits(ctx, c, token, base, owner, r.Name, since)
+	if err != nil {
+		item.Error = appendErr(item.Error, "commits: "+err.Error())
+		item.ActivityStatus = "error"
+	} else {
+		item.ActivityStatus = "ready"
+		item.Active = item.Commits >= 10
+		item.ActivityScore = item.Commits
+	}
+	item.Weeks, err = getStarHistory(ctx, c, token, base, owner, r.Name)
+	if err != nil {
+		item.Error = appendErr(item.Error, "star history: "+err.Error())
+	} else {
+		item.StarStatus = "ready"
+	}
+	item.LOC, err = getLOC(ctx, c, owner, r.Name, r.Branch)
+	if err != nil {
+		item.Error = appendErr(item.Error, "LOC: "+err.Error())
+	} else {
+		item.LOCStatus = "ready"
+	}
+	item.Readme, err = getReadme(ctx, c, token, base, owner, r.Name)
+	if err != nil && !isHTTPStatus(err, 404) {
+		item.Error = appendErr(item.Error, "README: "+err.Error())
+	}
+	return item
 }
 func appendErr(a, b string) string {
 	if a != "" {
@@ -380,7 +386,7 @@ func setMetaTx(tx *sql.Tx, key, value string) error {
 	_, e := tx.Exec(`INSERT INTO meta(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value`, key, value)
 	return e
 }
-func insertRepo(tx *sql.Tx, x fetchedRepo) error {
+func insertRepo(tx *sql.Tx, x fetchedRepo) (int64, error) {
 	desc := ""
 	if x.Description != nil {
 		desc = *x.Description
@@ -400,6 +406,10 @@ func insertRepo(tx *sql.Tx, x fetchedRepo) error {
 		byLang, _ = json.Marshal(x.LOC.LocByLangs)
 		tree, _ = json.Marshal(x.LOC.Children)
 	}
-	_, e := tx.Exec(`INSERT INTO repositories(full_name,owner,name,description,html_url,api_url,stars,watchers,forks,open_issues,size_kb,primary_language,languages_json,license_name,license_spdx,topics_json,is_fork,is_archived,is_private,default_branch,created_at,updated_at,pushed_at,starred_at,readme_excerpt,activity_score,is_active,activity_status,commits_60d,star_history_json,star_history_status,loc_total,loc_by_language_json,loc_tree_json,loc_status,fetch_error,fetched_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, x.FullName, x.Owner.Login, x.Name, desc, x.HTMLURL, x.URL, x.Stars, x.Watchers, x.Forks, x.Issues, x.Size, x.Language, string(langs), lic, spdx, string(topics), x.Fork, x.Archived, x.Private, x.Branch, x.Created, x.Updated, x.Pushed, x.StarredAt, x.Readme, x.Commits, x.Active, x.ActivityStatus, x.Commits, string(weeks), x.StarStatus, total, string(byLang), string(tree), x.LOCStatus, x.Error, time.Now().UTC().Format(time.RFC3339))
-	return e
+	result, e := tx.Exec(`INSERT INTO repositories(github_id,full_name,owner,name,description,html_url,api_url,stars,watchers,forks,open_issues,size_kb,primary_language,languages_json,license_name,license_spdx,topics_json,is_fork,is_archived,is_private,default_branch,created_at,updated_at,pushed_at,starred_at,readme_excerpt,activity_score,is_active,activity_status,commits_60d,star_history_json,star_history_status,loc_total,loc_by_language_json,loc_tree_json,loc_status,fetch_error,fetched_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, x.ID, x.FullName, x.Owner.Login, x.Name, desc, x.HTMLURL, x.URL, x.Stars, x.Watchers, x.Forks, x.Issues, x.Size, x.Language, string(langs), lic, spdx, string(topics), x.Fork, x.Archived, x.Private, x.Branch, x.Created, x.Updated, x.Pushed, x.StarredAt, x.Readme, x.Commits, x.Active, x.ActivityStatus, x.Commits, string(weeks), x.StarStatus, total, string(byLang), string(tree), x.LOCStatus, x.Error, time.Now().UTC().Format(time.RFC3339))
+	if e != nil {
+		return 0, e
+	}
+	id, e := result.LastInsertId()
+	return id, e
 }

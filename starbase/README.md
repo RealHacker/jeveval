@@ -19,6 +19,7 @@ $env:GH_TOKEN = "..."
 $env:TYPESAFE_API_KEY = "..."
 starbase fetch
 starbase tag
+starbase refresh
 starbase serve
 ```
 
@@ -27,6 +28,8 @@ starbase serve
 GitHub's API star-history endpoint is used instead of parsing Star History HTML. The LOC breakdown comes from the structured `ghloc.ifels.dev` endpoint used by `ghloc-web`; it includes total LOC, per-language LOC and directory data. `ghloc-web`'s own public badge route exposes only a badge value.
 
 `tag` reads each stored description, language map, and README excerpt (at most 1,024 words), sends one Jev Choice question using the tags in `tags.txt`, and stores up to six tags with probability >= 0.1. Rerunning it replaces the old tag assignments. Options: `--db`, `--tagsfile`, `--endpoint`, `--model`, `--api-key-env`, and `--timeout`.
+
+`refresh` compares the current starred list with the database using GitHub repository IDs. It fetches activity, star history, LOC and repository metadata only for additions, then uses Jev to tag those additions. Repositories no longer starred are deleted, along with their tag rows. Existing repositories and their tags are left untouched. Deletions, additions, tags and legacy ID backfills are committed together; if fetching or Jev tagging fails, the database remains unchanged. When there are no additions, refresh does not require a Jev key. It requires fetch and tag to have completed first. Options: `--db`, `--github-token-env`, `--github-api`, `--api-key-env`, `--endpoint`, `--model`, `--tagsfile`, and `--timeout`.
 
 `serve` requires both fetch and tag stages to be ready and starts the dashboard at `http://127.0.0.1:8080`. The UI supports paging, language/activity/tag filters, and sorting by starred time (default), stars, activity score, or LOC. Repository detail cards show star history, LOC, metadata and the README excerpt. Options: `--db`, `--addr`, and `--page-size`.
 

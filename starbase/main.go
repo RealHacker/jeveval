@@ -18,7 +18,7 @@ PRAGMA journal_mode=WAL;
 PRAGMA foreign_keys=ON;
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS repositories (
- id INTEGER PRIMARY KEY, full_name TEXT NOT NULL UNIQUE, owner TEXT NOT NULL, name TEXT NOT NULL,
+ id INTEGER PRIMARY KEY, github_id INTEGER NOT NULL DEFAULT 0, full_name TEXT NOT NULL UNIQUE, owner TEXT NOT NULL, name TEXT NOT NULL,
  description TEXT NOT NULL DEFAULT '', html_url TEXT NOT NULL, api_url TEXT NOT NULL,
  stars INTEGER NOT NULL DEFAULT 0, watchers INTEGER NOT NULL DEFAULT 0, forks INTEGER NOT NULL DEFAULT 0,
  open_issues INTEGER NOT NULL DEFAULT 0, size_kb INTEGER NOT NULL DEFAULT 0, primary_language TEXT NOT NULL DEFAULT '',
@@ -50,17 +50,19 @@ func main() {
 }
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: starbase fetch|tag|serve [flags]")
+		return fmt.Errorf("usage: starbase fetch|tag|refresh|serve [flags]")
 	}
 	switch args[0] {
 	case "fetch":
 		return runFetch(args[1:])
 	case "tag":
 		return runTag(args[1:])
+	case "refresh":
+		return runRefresh(args[1:])
 	case "serve":
 		return runServe(args[1:])
 	case "--help", "-h":
-		fmt.Println("Usage: starbase fetch|tag|serve [flags]")
+		fmt.Println("Usage: starbase fetch|tag|refresh|serve [flags]")
 		return nil
 	default:
 		return fmt.Errorf("unknown command %q", args[0])
@@ -76,7 +78,42 @@ func openDB(path string) (*sql.DB, error) {
 		db.Close()
 		return nil, err
 	}
+	if err = ensureGitHubIDColumn(db); err != nil {
+		db.Close()
+		return nil, err
+	}
 	return db, nil
+}
+
+func ensureGitHubIDColumn(db *sql.DB) error {
+	rows, err := db.Query(`PRAGMA table_info(repositories)`)
+	if err != nil {
+		return err
+	}
+	found := false
+	for rows.Next() {
+		var cid, notnull, pk int
+		var name, kind string
+		var defaultValue any
+		if err = rows.Scan(&cid, &name, &kind, &notnull, &defaultValue, &pk); err != nil {
+			rows.Close()
+			return err
+		}
+		if name == "github_id" {
+			found = true
+		}
+	}
+	if err = rows.Err(); err != nil {
+		rows.Close()
+		return err
+	}
+	if err = rows.Close(); err != nil {
+		return err
+	}
+	if !found {
+		_, err = db.Exec(`ALTER TABLE repositories ADD COLUMN github_id INTEGER NOT NULL DEFAULT 0`)
+	}
+	return err
 }
 func ready(db *sql.DB, stage string) bool {
 	var s string
@@ -151,6 +188,43 @@ func runTag(args []string) error {
 	client := &http.Client{Timeout: *timeout, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	return tagAll(context.Background(), d, client, *endpoint, key, *model, tags)
 }
+
+func runRefresh(args []string) error {
+	f := flag.NewFlagSet("refresh", flag.ContinueOnError)
+	dbPath := f.String("db", "starbase.db", "SQLite database")
+	githubTokenEnv := f.String("github-token-env", "GH_TOKEN", "GitHub token environment variable")
+	githubAPI := f.String("github-api", "https://api.github.com", "GitHub REST API base URL")
+	jevKeyEnv := f.String("api-key-env", "TYPESAFE_API_KEY", "Jev API key environment variable")
+	jevEndpoint := f.String("endpoint", "https://api.typesafe.ai/v1/systemone", "Jev endpoint")
+	jevModel := f.String("model", "jev-latest", "Jev model")
+	tagsFile := f.String("tagsfile", "tags.txt", "valid tags, one per line")
+	timeout := f.Duration("timeout", 60*time.Second, "HTTP timeout")
+	if e := f.Parse(args); e != nil {
+		if errors.Is(e, flag.ErrHelp) {
+			return nil
+		}
+		return e
+	}
+	if f.NArg() > 0 {
+		return fmt.Errorf("unexpected positional arguments")
+	}
+	githubToken := os.Getenv(*githubTokenEnv)
+	if githubToken == "" {
+		return fmt.Errorf("environment variable %s is required", *githubTokenEnv)
+	}
+	db, err := openDB(*dbPath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	if !ready(db, "fetch") || !ready(db, "tag") {
+		return fmt.Errorf("fetch and tag must complete before refresh")
+	}
+	client := &http.Client{Timeout: *timeout, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	jevKey := os.Getenv(*jevKeyEnv)
+	return refreshAll(context.Background(), db, client, githubToken, *githubAPI, client, *jevEndpoint, jevKey, *jevModel, *tagsFile)
+}
+
 func runServe(args []string) error {
 	f := flag.NewFlagSet("serve", flag.ContinueOnError)
 	dbPath := f.String("db", "starbase.db", "SQLite database")

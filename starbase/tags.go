@@ -24,6 +24,38 @@ type jevResponse struct {
 	Answers map[string]jevAnswer `json:"answers"`
 }
 
+type tagProbability struct {
+	Name        string
+	Probability float64
+}
+
+func evaluateRepoTags(ctx context.Context, c *http.Client, endpoint, key, model string, repo fetchedRepo, tags []string) ([]tagProbability, error) {
+	description := ""
+	if repo.Description != nil {
+		description = *repo.Description
+	}
+	state, err := json.Marshal(map[string]any{
+		"repository":              repo.FullName,
+		"description":             description,
+		"primary_language":        repo.Language,
+		"languages":               repo.Languages,
+		"readme_first_1024_words": repo.Readme,
+	})
+	if err != nil {
+		return nil, err
+	}
+	scores, err := evaluateJev(ctx, c, endpoint, key, model, string(state), tags)
+	if err != nil {
+		return nil, err
+	}
+	selected := selectTags(tags, scores)
+	out := make([]tagProbability, 0, len(selected))
+	for _, tag := range selected {
+		out = append(out, tagProbability{Name: tag, Probability: scores[tag]})
+	}
+	return out, nil
+}
+
 func readValidTags(path string) ([]string, error) {
 	f, e := os.Open(path)
 	if e != nil {
