@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>JevBot fixture</title>
+<style>body{font:18px system-ui;margin:40px;background:#f5f3e9;color:#193d35}button,a,p,img{display:block;margin:20px 0}button{padding:18px}img{width:200px;height:130px}#bottom{margin-top:1400px}a{width:max-content}</style></head><body>
+<h1>A page for JevBot</h1><button id="like" aria-pressed="false">Like comment</button><p id="text">A cat is asleep in the sunshine.</p>
+<a id="link" href="/destination">Cat encyclopedia</a><img id="cat" alt="Cat illustration" src="/cat.svg">
+<div id="shadow"></div><iframe id="frame" src="/frame" title="Same origin frame"></iframe>
+<p id="bottom">You reached the bottom.</p><script>
+document.getElementById('like').addEventListener('click', event=>{event.target.setAttribute('aria-pressed','true');event.target.textContent='Liked';});
+document.getElementById('shadow').attachShadow({mode:'open'}).innerHTML='<button id="shadow-button">Shadow target</button>';
+</script></body></html>

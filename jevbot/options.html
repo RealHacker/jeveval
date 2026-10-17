@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JevBot settings</title><link rel="stylesheet" href="styles.css"></head>
+<body class="options-body"><header class="app-header"><div class="brand"><span class="brand-mark" aria-hidden="true">j.</span><strong>JevBot</strong></div><span>Settings</span></header><main>
+  <div class="eyebrow">CONNECTION & TIMING</div><h1>Give Jev a view.</h1><p>Connect your TypeSafe account to make decisions from page screenshots.</p>
+  <form id="settings-form" class="options-form">
+    <label for="api-key">TypeSafe API key</label><input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Enter your API key"><p class="hint">Stored locally in this Chrome profile. Leave empty and save to remove it.</p>
+    <label for="model">Jev model</label><input id="model" required maxlength="120" value="jev-preview" spellcheck="false"><p class="hint">Use jev-preview or jev-1.14.0 for Box support.</p>
+    <label for="settle-ms">Wait before each screenshot (ms)</label><input id="settle-ms" required type="number" min="500" max="10000" step="100" value="1000"><p class="hint">A short pause after actions lets the page render. Increase it for slow sites.</p>
+    <div class="button-row"><button type="submit">Save settings</button><span id="saved" role="status"></span></div>
+  </form>
+  <div id="notice" class="notice" role="alert" hidden></div>
+  <div class="options-notes"><h2>What leaves your browser</h2><p>During a run, the task, current viewport screenshot, page URL/title, action history, and collected results are sent to TypeSafe. Screenshots can contain private information visible on the page. Your API key is sent only to api.typesafe.ai.</p><p>Request history is saved in extension localStorage on this device. Screenshots are kept in memory only. No analytics or other backend is used. The API key is stored locally, without application-level encryption.</p><p>JevBot can read and act on HTTP(S) pages. It requests broad site access so automation can continue across navigation. Only start tasks on pages you want it to operate on.</p><p>Images and Box are experimental TypeSafe features. <a href="https://docs.typesafe.ai/images" target="_blank" rel="noopener noreferrer">Image documentation</a> · <a href="https://docs.typesafe.ai/primitives/box" target="_blank" rel="noopener noreferrer">Box documentation</a></p></div>
+</main><script type="module" src="options.js"></script></body></html>

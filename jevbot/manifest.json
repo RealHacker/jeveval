@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "JevBot — Visual page assistant",
+  "version": "0.2.0",
+  "description": "Automate the current page with Jev's visual Choice and Box questions.",
+  "minimum_chrome_version": "116",
+  "permissions": ["sidePanel", "storage", "scripting", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "action": { "default_title": "Open JevBot" },
+  "background": { "service_worker": "background.js", "type": "module" },
+  "side_panel": { "default_path": "panel.html" },
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'; connect-src https://api.typesafe.ai data:" }
+}

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>JevBot</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <header class="app-header"><div class="brand"><span class="brand-mark" aria-hidden="true">j.</span><div><strong>JevBot</strong><small>YOUR PAGE, IN ACTION</small></div></div><button id="settings" class="quiet" type="button">Settings ↗</button></header>
+  <main>
+    <section class="composer" aria-labelledby="task-title">
+      <div class="eyebrow">VISUAL PAGE ASSISTANT</div><h1 id="task-title">What needs doing?</h1>
+      <form id="task-form">
+        <label class="sr-only" for="task">Task instruction</label><textarea id="task" rows="4" maxlength="8000" placeholder="Find all images with cats on this page and save their URLs." required></textarea>
+        <div class="form-row"><label for="max-steps">Step limit <input id="max-steps" type="number" min="1" max="200" value="30" required></label><div class="button-row"><button id="stop" class="danger" type="button" hidden>Stop</button><button id="run" type="submit">Run on this page <span aria-hidden="true">↗</span></button></div></div>
+      </form>
+      <p class="privacy">Run sends page screenshots and task history to TypeSafe. Keep this tab active and the sidebar open. Red outlines label previous actions; other actions on the same target are still allowed.</p>
+    </section>
+    <div id="notice" role="alert" class="notice" hidden></div>
+    <section class="run-summary" aria-live="polite"><span id="status" class="status">Ready</span><span id="phase">Give Jev a task to get started.</span></section>
+    <nav class="view-tabs" aria-label="Run views"><button id="actions-tab" class="selected" aria-pressed="true" type="button">Actions <span id="action-count">0</span></button><button id="results-tab" aria-pressed="false" type="button">Results <span id="result-count">0</span></button></nav>
+    <section id="actions-view" aria-label="Action timeline"><ol id="actions" class="timeline"></ol><p id="actions-empty" class="empty">A step at a time.<br><span>Jev’s decisions and page responses will appear here.</span></p></section>
+    <section id="results-view" aria-label="Collected results" hidden><div class="section-heading"><span>COLLECTED ON THIS RUN</span><button id="export" class="quiet" type="button" disabled>Export JSON ↓</button></div><ul id="results" class="results"></ul><p id="results-empty" class="empty">Nothing collected yet.<br><span>Saved text, image URLs, and links appear here.</span></p></section>
+    <section class="history-section" aria-labelledby="history-title"><div class="section-heading"><h2 id="history-title">Request history</h2><button id="clear-history" class="quiet" type="button">Clear history</button></div><p class="hint">Open a request to inspect it or use its instruction again. Up to 40 recent runs are kept locally.</p><ul id="history" class="history"></ul></section>
+  </main>
+  <footer>Powered by Jev <span>Choice → Box → Action</span></footer>
+  <script type="module" src="panel.js"></script>
+</body></html>
